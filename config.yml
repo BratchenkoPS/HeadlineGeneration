@@ -1,0 +1,6 @@
+Dataloader:
+  url: 'https://github.com/RossiyaSegodnya/ria_news_dataset/raw/master/ria_1k.json'
+  path: 'data/'
+  name: 'ria_1k.json'
+  max_txt_length: 500
+  samples: 900
