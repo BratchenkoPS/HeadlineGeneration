@@ -1,0 +1,5 @@
+/venv
+.DS_store
+.idea
+data/
+result
