@@ -4,3 +4,22 @@ Dataloader:
   name: 'ria_1k.json'
   max_txt_length: 500
   samples: 900
+
+Embedder:
+  use_url: "https://tfhub.dev/google/universal-sentence-encoder/4"
+  tsne_config:
+    n_jobs: -1
+    n_components: 2
+    verbose: 1
+
+Clustering:
+  directory: 'result/'
+  cluster_picture_name: 'clusters.html'
+  result_data_file_name: 'result_df.csv'
+  center_replics_file_name: 'center_replics.json'
+  part_to_plot: 0.1
+  bgm_config:
+    n_components: 50
+    random_state: 42
+    verbose: 1
+    max_iter: 5000
