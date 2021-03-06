@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import time
+import logging
 
 from dataloader import DataLoader
 from embeddings import Embedder
@@ -18,6 +19,8 @@ from metrics import calculate_avg_rouge_f
 if __name__ == '__main__':
     with open('config.yml', 'r') as file:
         config = yaml.load(file)
+
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
     loader = DataLoader(config['Dataloader']['url'],
                         config['Dataloader']['path'],
@@ -80,26 +83,28 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss(ignore_index=trg_pad_idx)
     count_parameters(model)
 
-    N_EPOCHS = 10
+    N_EPOCHS = 100
     CLIP = 0.1
 
     best_valid_loss = float('inf')
 
     for epoch in range(N_EPOCHS):
         start_time = time.time()
-
+        model.train()
         train_loss = train(model, train_iterator, optimizer, criterion, CLIP)
         test_loss = evaluate(model, test_iterator, criterion)
 
         end_time = time.time()
 
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
-        if epoch > 5:
-            metrics_epoch = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
-            print(f'\t Val. Loss: {test_loss:.3f} |  Metrics_val: {metrics_epoch}')
+
+        metrics_train = calculate_avg_rouge_f(train_data, SRC, TRG, model, device)
+        metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
+
         if test_loss < best_valid_loss:
             best_valid_loss = test_loss
-            torch.save(model.state_dict(), 'result/tut5-model.pt')
+            torch.save(model.state_dict(), 'models/tut5-model.pt')
 
         print(f'Epoch: {epoch + 1:02} | Time: {epoch_mins}m {epoch_secs}s')
-        print(f'\t Val. Loss: {test_loss:.3f}')
+        print(f'\tTrain Loss: {train_loss:.3f} |  Metrics_train: {metrics_train}')
+        print(f'\tVal. Loss: {test_loss:.3f} |  Metrics_val: {metrics_test}')

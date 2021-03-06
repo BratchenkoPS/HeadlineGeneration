@@ -22,25 +22,15 @@ class DataLoader:
         self.file_directory.mkdir(exist_ok=True)
         wget.download(self.file_url, str(self.total_file_path))  # wget only works with str sadly
 
-    def load_file(self, max_text_length: int, n_samples: int):
+    def load_file(self, n_samples: int): # TODO add gz support
         self.data = []
         logging.info('Starting to load json into memory')
-        # if str(self.total_file_path).split('.')[-1] == 'gz':
-        #     with gzip.open('ria_1k.json.gz', 'rt') as file:
-        # else:
-        with open(self.total_file_path, 'r') as file:
+        with gzip.open(self.total_file_path, 'rt') as file:
 
             for line in tqdm(file):
                 example = json.loads(line)
-
                 if len(self.data) < n_samples:
-                    length = len(example['text'].split())
-
-                    if length <= max_text_length:
-                        example['length'] = length
-                        example['text'] = '<sos> ' + example['text'] + ' <eos>'
-                        example['title'] = '<sos> ' + example['title'] + ' <eos>'
-                        self.data.append(example)
+                    self.data.append(example)
                 else:
                     break
 
@@ -58,22 +48,21 @@ class DataLoader:
         fixed_text = re.sub(' +', ' ', fixed_text)  # fix multiple spaces
         return fixed_text
 
-    def clean_data(self):
+    def clean_data(self):  # TODO need to add nan cleaning
         logging.info('Starting data cleaning')
-        for n, sample in tqdm(enumerate(self.data)):
-            text = sample['text']
-            title = sample['title']
-            self.data[n]['text'] = self.clean_text(text)
-            self.data[n]['title'] = self.clean_text(title)
+        for text in tqdm(self.data['text']):
+            self.data['text'] = self.clean_text(text)
 
     def get_data(self, max_text_length: int, n_samples: int):
         self.download_file()
-        self.load_file(max_text_length, n_samples)
-        self.clean_data()
+        self.load_file(n_samples)
         self.data = pd.DataFrame({'text': [sample['text'] for sample in self.data],
-                                  'title': [sample['title'] for sample in self.data],
-                                  'length': [sample['length'] for sample in self.data]})
+                                  'title': [sample['title'] for sample in self.data]})
+        self.data.dropna(inplace=True)
+        self.data.reset_index(inplace=True, drop=True)
+        self.clean_data()
 
         self.data['length'] = self.data['text'].apply(lambda x: len(x.split(' ')))
         self.data = self.data[self.data['length'] < max_text_length]
         return self.data
+

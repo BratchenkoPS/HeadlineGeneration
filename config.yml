@@ -1,12 +1,13 @@
 Dataloader:
-  url: 'https://github.com/RossiyaSegodnya/ria_news_dataset/raw/master/ria_1k.json'
+  url: 'https://github.com/RossiyaSegodnya/ria_news_dataset/raw/master/ria.json.gz'
   path: 'data/'
-  name: 'ria_1k.json'
-  max_txt_length: 500
+  name: 'ria.json.gz'
+  max_txt_length: 498
   samples: 900
 
 Embedder:
-  use_url: "https://tfhub.dev/google/universal-sentence-encoder/4"
+  use_url: "https://tfhub.dev/google/universal-sentence-encoder/4?tf-hub-format=compressed"
+  use_directory: 'models/use'
   tsne_config:
     n_jobs: -1
     n_components: 2

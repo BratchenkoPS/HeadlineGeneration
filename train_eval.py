@@ -40,7 +40,6 @@ def train(model, iterator, optimizer, criterion, clip):
 
 def evaluate(model, iterator, criterion):
     model.eval()
-
     epoch_loss = 0
 
     with torch.no_grad():
@@ -69,7 +68,6 @@ def evaluate(model, iterator, criterion):
 
 
 def generate_headline(sentence, src_field, trg_field, model, device, max_len=500):
-    model.eval()
 
     tokens = [token.lower() for token in sentence]
 
