@@ -53,7 +53,8 @@ class Splitter:
         train_iterator, test_iterator = BucketIterator.splits(
             (train_data, test_data),
             batch_size=self.batch_size,
-            device=self.device)
+            device=self.device,
+            sort=False)
 
         return train_iterator, test_iterator, train_data, test_data, SRC, TRG
 

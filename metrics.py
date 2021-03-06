@@ -1,12 +1,13 @@
 from rouge import Rouge
 from train_eval import generate_headline
+from tqdm import tqdm
 
 
 def calculate_avg_rouge_f(test_data, SRC, TRG, model, device):
     pred_list = []
     ref_list = []
 
-    for example in test_data.examples[1:]:
+    for example in tqdm(test_data.examples[1:]):
         src = example.src
 
         prediction = generate_headline(src, SRC, TRG, model, device)

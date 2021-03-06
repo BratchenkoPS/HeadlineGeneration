@@ -3,6 +3,7 @@ import logging
 import json
 import wget
 import pandas as pd
+import gzip
 
 from tqdm import tqdm
 from pathlib import Path
@@ -24,7 +25,9 @@ class DataLoader:
     def load_file(self, max_text_length: int, n_samples: int):
         self.data = []
         logging.info('Starting to load json into memory')
-
+        # if str(self.total_file_path).split('.')[-1] == 'gz':
+        #     with gzip.open('ria_1k.json.gz', 'rt') as file:
+        # else:
         with open(self.total_file_path, 'r') as file:
 
             for line in tqdm(file):
@@ -35,6 +38,8 @@ class DataLoader:
 
                     if length <= max_text_length:
                         example['length'] = length
+                        example['text'] = '<sos> ' + example['text'] + ' <eos>'
+                        example['title'] = '<sos> ' + example['title'] + ' <eos>'
                         self.data.append(example)
                 else:
                     break
@@ -68,4 +73,7 @@ class DataLoader:
         self.data = pd.DataFrame({'text': [sample['text'] for sample in self.data],
                                   'title': [sample['title'] for sample in self.data],
                                   'length': [sample['length'] for sample in self.data]})
+
+        self.data['length'] = self.data['text'].apply(lambda x: len(x.split(' ')))
+        self.data = self.data[self.data['length'] < max_text_length]
         return self.data

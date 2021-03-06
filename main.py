@@ -39,6 +39,8 @@ if __name__ == '__main__':
                             config['Clustering']['bgm_config'])
 
     df = clustering.get_clusters_and_final_data(embeddings)
+    # import pandas as pd
+    # df = pd.read_csv('result/result_df.csv')
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -92,11 +94,12 @@ if __name__ == '__main__':
         end_time = time.time()
 
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
-        metrics_epoch = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
-
+        if epoch > 5:
+            metrics_epoch = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
+            print(f'\t Val. Loss: {test_loss:.3f} |  Metrics_val: {metrics_epoch}')
         if test_loss < best_valid_loss:
             best_valid_loss = test_loss
             torch.save(model.state_dict(), 'result/tut5-model.pt')
 
         print(f'Epoch: {epoch + 1:02} | Time: {epoch_mins}m {epoch_secs}s')
-        print(f'\t Val. Loss: {test_loss:.3f} |  Metrics_val: {metrics_epoch}')
+        print(f'\t Val. Loss: {test_loss:.3f}')
