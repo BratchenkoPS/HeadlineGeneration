@@ -13,19 +13,21 @@ class DataLoader:
     """
     Class used to load archive with RIA_news dataset in json format
     """
-    def __init__(self, file_url: str, file_directory: str, file_name: str) -> None:
+    def __init__(self, file_url: str, file_directory: str, file_name: str, download: bool) -> None:
         """
 
         Args:
             file_url: url to file with RIA_news dataset
             file_directory: directory to download and save dataset file
             file_name: dataset file name
+            download: whether or not to download file (not needed if you already have it)
         """
         self.file_url = file_url
         self.file_directory = Path(file_directory).absolute()
         self.file_name = file_name
         self.total_file_path = self.file_directory.joinpath(self.file_name)
         self.data = None
+        self.download = download
 
     def download_file(self) -> None:
         """
@@ -93,7 +95,8 @@ class DataLoader:
         Returns: preprocessed data - dataframe with 3 columns: text, title and length
 
         """
-        self.download_file()
+        if self.download:
+            self.download_file()
         self.load_file(max_text_length, n_samples)
         self.data = pd.DataFrame({'text': [sample['text'] for sample in self.data],
                                   'title': [sample['title'] for sample in self.data]})

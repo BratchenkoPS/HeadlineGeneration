@@ -34,24 +34,25 @@ if __name__ == '__main__':
 
     loader = DataLoader(config['Dataloader']['url'],
                         config['Dataloader']['path'],
-                        config['Dataloader']['name'])
+                        config['Dataloader']['name'],
+                        config['Dataloader']['download'])
 
     data = loader.get_data(config['Dataloader']['max_txt_length'],
                            config['Dataloader']['samples'])
 
-    # emb = Embedder(config['Embedder'])
-    #
-    # embeddings = emb.get_embeddings(data['title'])
-    #
-    # clustering = Clustering(data,
-    #                         config['Clustering']['directory'],
-    #                         config['Clustering']['cluster_picture_name'],
-    #                         config['Clustering']['result_data_file_name'],
-    #                         config['Clustering']['center_replics_file_name'],
-    #                         config['Clustering']['part_to_plot'],
-    #                         config['Clustering']['bgm_config'])
-    #
-    # df = clustering.get_clusters_and_final_data(embeddings)
+    emb = Embedder(config['Embedder'])
+
+    embeddings = emb.get_embeddings(data['title'])
+
+    clustering = Clustering(data,
+                            config['Clustering']['directory'],
+                            config['Clustering']['cluster_picture_name'],
+                            config['Clustering']['result_data_file_name'],
+                            config['Clustering']['center_replics_file_name'],
+                            config['Clustering']['part_to_plot'],
+                            config['Clustering']['bgm_config'])
+
+    df = clustering.get_clusters_and_final_data(embeddings)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -103,16 +104,18 @@ if __name__ == '__main__':
         test_loss = evaluate(model, test_iterator, criterion)
 
         # metrics_train = calculate_avg_rouge_f(train_data, SRC, TRG, model, device)
-        metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
+
+        if (epoch + 1) % 10 == 0:
+            metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
+            print(f'\tMetrics_test: {metrics_test}')
 
         end_time = time.time()
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
 
         if test_loss < best_test_loss:
             best_test_loss = test_loss
-            torch.save(model.state_dict(), 'models/tut5-model.pt')
+            torch.save(model.state_dict(), 'models/best-model.pt')
 
         print(f'Epoch: {epoch + 1:02} | Time: {epoch_mins}m {epoch_secs}s')
         print(f'\tTrain Loss: {train_loss:.3f} |  Val. Loss: {test_loss:.3f}')
         # print(f'\tMetrics_train: {metrics_train}')
-        print(f'\tMetrics_test: {metrics_test}')

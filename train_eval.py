@@ -1,4 +1,5 @@
 import torch
+import logging
 from tqdm import tqdm
 
 
@@ -6,10 +7,12 @@ def train(model, iterator, optimizer, criterion, clip):
     model.train()
 
     epoch_loss = 0
-
+    logging.info('Processing batches')
     for i, batch in enumerate(tqdm(iterator)):
         src = batch.src
         trg = batch.trg
+        print(src, 'src')
+        print(trg, 'trg')
 
         optimizer.zero_grad()
 

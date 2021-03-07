@@ -1,11 +1,13 @@
 Dataloader:
+  download: True
   url: 'https://github.com/RossiyaSegodnya/ria_news_dataset/raw/master/ria.json.gz'
   path: 'data/'
   name: 'ria.json.gz'
   max_txt_length: 98
-  samples: 1000
+  samples: 100000
 
 Embedder:
+  download: True
   use_url: "https://tfhub.dev/google/universal-sentence-encoder/4?tf-hub-format=compressed"
   use_directory: 'models/use'
   use_file_name: 'use_model_v4.tar.gz'
@@ -30,7 +32,7 @@ Splitter:
   path_to_save_data: 'data/'
   min_freq: 1
   test_size: 0.1
-  batch_size: 2
+  batch_size: 128
 
 model:
   EMB_DIM: 256

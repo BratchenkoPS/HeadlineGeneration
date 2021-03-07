@@ -19,7 +19,7 @@ class Embedder:
         """
 
         Args:
-            config: dict with parameters: url, directory, filename and TSNE config
+            config: dict with parameters: url, directory, filename, download flag and TSNE config
         """
         logging.info('Staring to load Universal Sentence Encoder and build embeddings')
         self.use_url = config['use_url']
@@ -27,6 +27,7 @@ class Embedder:
         self.use_file_name = config['use_file_name']
         self.use_model = None
         self.tsne = TSNE(**config['tsne_config'])
+        self.download = config['download']
 
     def get_embeddings(self, list_of_text: List) -> List:
         """
@@ -37,7 +38,8 @@ class Embedder:
         Returns: List of 2d vectors for each sentence.
 
         """
-        self.download_use()
+        if self.download:
+            self.download_use()
         self.use_model = hub.load(str(self.use_directory))
         use_embeddings = []
         for text in tqdm(list_of_text):
