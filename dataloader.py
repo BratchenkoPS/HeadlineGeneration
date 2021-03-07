@@ -10,32 +10,64 @@ from pathlib import Path
 
 
 class DataLoader:
-    def __init__(self, file_url: str, file_directory: str, file_name: str):
+    """
+    Class used to load archive with RIA_news dataset in json format
+    """
+    def __init__(self, file_url: str, file_directory: str, file_name: str) -> None:
+        """
+
+        Args:
+            file_url: url to file with RIA_news dataset
+            file_directory: directory to download and save dataset file
+            file_name: dataset file name
+        """
         self.file_url = file_url
         self.file_directory = Path(file_directory).absolute()
         self.file_name = file_name
         self.total_file_path = self.file_directory.joinpath(self.file_name)
         self.data = None
 
-    def download_file(self):
+    def download_file(self) -> None:
+        """
+        Downloads dataset from given URL
+        """
         logging.info('Starting to download data')
         self.file_directory.mkdir(exist_ok=True)
         wget.download(self.file_url, str(self.total_file_path))  # wget only works with str sadly
 
-    def load_file(self, n_samples: int): # TODO add gz support
+    def load_file(self, max_text_length: int, n_samples: int) -> None:
+        """
+        Loads json into memory with respect to the diven amount of samples and maximum text length
+
+        Args:
+            max_text_length: maximum text length filter
+            n_samples: the amounts of examples to load
+
+        Returns: None
+
+        """
         self.data = []
         logging.info('Starting to load json into memory')
         with gzip.open(self.total_file_path, 'rt') as file:
 
             for line in tqdm(file):
                 example = json.loads(line)
-                if len(self.data) < n_samples:
-                    self.data.append(example)
-                else:
-                    break
+                example['text'] = self.clean_text(example['text'])
+                example['title'] = self.clean_text(example['title'])
+                if len(example['text'].split(' ')) < max_text_length:
+                    if len(self.data) < n_samples:
+                        self.data.append(example)
 
     @staticmethod
-    def clean_text(text: str):
+    def clean_text(text: str) -> str:
+        """
+        Cleans given text with regex, deleting certain artifacts from parsing
+        Args:
+            text: string with text from dataset
+
+        Returns: fixed string without artifacts
+
+        """
         fixed_text = re.sub('<[^>]+>', ' ', text)  # removing everything inside <>
         fixed_text = re.sub('\n', ' ', fixed_text)
         fixed_text = re.sub('&nbsp;', ' ', fixed_text)
@@ -48,21 +80,23 @@ class DataLoader:
         fixed_text = re.sub(' +', ' ', fixed_text)  # fix multiple spaces
         return fixed_text
 
-    def clean_data(self):  # TODO need to add nan cleaning
-        logging.info('Starting data cleaning')
-        for text in tqdm(self.data['text']):
-            self.data['text'] = self.clean_text(text)
+    def get_data(self, max_text_length: int, n_samples: int) -> pd.DataFrame:
+        """
+        Uses all methods above to download, load and clean dataset with given parameters
 
-    def get_data(self, max_text_length: int, n_samples: int):
+        Args:
+            max_text_length: maximum text length filter
+            n_samples: the amounts of examples to load
+
+        Returns: preprocessed data - dataframe with 3 columns: text, title and length
+
+        """
         self.download_file()
-        self.load_file(n_samples)
+        self.load_file(max_text_length, n_samples)
         self.data = pd.DataFrame({'text': [sample['text'] for sample in self.data],
                                   'title': [sample['title'] for sample in self.data]})
         self.data.dropna(inplace=True)
         self.data.reset_index(inplace=True, drop=True)
-        self.clean_data()
 
         self.data['length'] = self.data['text'].apply(lambda x: len(x.split(' ')))
-        self.data = self.data[self.data['length'] < max_text_length]
         return self.data
-

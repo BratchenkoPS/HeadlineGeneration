@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.optim as optim
 import time
 import logging
+import random
+import numpy as np
 
 from dataloader import DataLoader
 from embeddings import Embedder
@@ -22,6 +24,14 @@ if __name__ == '__main__':
 
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
+    SEED = 42
+
+    random.seed(SEED)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    torch.cuda.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+
     loader = DataLoader(config['Dataloader']['url'],
                         config['Dataloader']['path'],
                         config['Dataloader']['name'])
@@ -29,21 +39,19 @@ if __name__ == '__main__':
     data = loader.get_data(config['Dataloader']['max_txt_length'],
                            config['Dataloader']['samples'])
 
-    emb = Embedder(config['Embedder'])
-
-    embeddings = emb.get_embeddings(data['title'])
-
-    clustering = Clustering(data,
-                            config['Clustering']['directory'],
-                            config['Clustering']['cluster_picture_name'],
-                            config['Clustering']['result_data_file_name'],
-                            config['Clustering']['center_replics_file_name'],
-                            config['Clustering']['part_to_plot'],
-                            config['Clustering']['bgm_config'])
-
-    df = clustering.get_clusters_and_final_data(embeddings)
-    # import pandas as pd
-    # df = pd.read_csv('result/result_df.csv')
+    # emb = Embedder(config['Embedder'])
+    #
+    # embeddings = emb.get_embeddings(data['title'])
+    #
+    # clustering = Clustering(data,
+    #                         config['Clustering']['directory'],
+    #                         config['Clustering']['cluster_picture_name'],
+    #                         config['Clustering']['result_data_file_name'],
+    #                         config['Clustering']['center_replics_file_name'],
+    #                         config['Clustering']['part_to_plot'],
+    #                         config['Clustering']['bgm_config'])
+    #
+    # df = clustering.get_clusters_and_final_data(embeddings)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -86,7 +94,7 @@ if __name__ == '__main__':
     N_EPOCHS = 100
     CLIP = 0.1
 
-    best_valid_loss = float('inf')
+    best_test_loss = float('inf')
 
     for epoch in range(N_EPOCHS):
         start_time = time.time()
@@ -94,17 +102,17 @@ if __name__ == '__main__':
         train_loss = train(model, train_iterator, optimizer, criterion, CLIP)
         test_loss = evaluate(model, test_iterator, criterion)
 
-        end_time = time.time()
-
-        epoch_mins, epoch_secs = epoch_time(start_time, end_time)
-
-        metrics_train = calculate_avg_rouge_f(train_data, SRC, TRG, model, device)
+        # metrics_train = calculate_avg_rouge_f(train_data, SRC, TRG, model, device)
         metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
 
-        if test_loss < best_valid_loss:
-            best_valid_loss = test_loss
+        end_time = time.time()
+        epoch_mins, epoch_secs = epoch_time(start_time, end_time)
+
+        if test_loss < best_test_loss:
+            best_test_loss = test_loss
             torch.save(model.state_dict(), 'models/tut5-model.pt')
 
         print(f'Epoch: {epoch + 1:02} | Time: {epoch_mins}m {epoch_secs}s')
-        print(f'\tTrain Loss: {train_loss:.3f} |  Metrics_train: {metrics_train}')
-        print(f'\tVal. Loss: {test_loss:.3f} |  Metrics_val: {metrics_test}')
+        print(f'\tTrain Loss: {train_loss:.3f} |  Val. Loss: {test_loss:.3f}')
+        # print(f'\tMetrics_train: {metrics_train}')
+        print(f'\tMetrics_test: {metrics_test}')

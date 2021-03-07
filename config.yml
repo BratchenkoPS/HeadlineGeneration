@@ -2,12 +2,13 @@ Dataloader:
   url: 'https://github.com/RossiyaSegodnya/ria_news_dataset/raw/master/ria.json.gz'
   path: 'data/'
   name: 'ria.json.gz'
-  max_txt_length: 498
-  samples: 900
+  max_txt_length: 98
+  samples: 1000
 
 Embedder:
   use_url: "https://tfhub.dev/google/universal-sentence-encoder/4?tf-hub-format=compressed"
   use_directory: 'models/use'
+  use_file_name: 'use_model_v4.tar.gz'
   tsne_config:
     n_jobs: -1
     n_components: 2
@@ -27,13 +28,13 @@ Clustering:
 
 Splitter:
   path_to_save_data: 'data/'
-  min_freq: 2
-  test_size: 0.2
+  min_freq: 1
+  test_size: 0.1
   batch_size: 2
 
 model:
-  EMB_DIM: 2
-  HID_DIM: 4 # each conv. layer has 2 * hid_dim filters
+  EMB_DIM: 256
+  HID_DIM: 512 # each conv. layer has 2 * hid_dim filters
   ENC_LAYERS: 10 # number of conv. blocks in encoder
   DEC_LAYERS: 10 # number of conv. blocks in decoder
   ENC_KERNEL_SIZE: 3 # must be odd!

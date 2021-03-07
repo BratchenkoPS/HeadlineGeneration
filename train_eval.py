@@ -1,4 +1,5 @@
 import torch
+from tqdm import tqdm
 
 
 def train(model, iterator, optimizer, criterion, clip):
@@ -6,7 +7,7 @@ def train(model, iterator, optimizer, criterion, clip):
 
     epoch_loss = 0
 
-    for i, batch in enumerate(iterator):
+    for i, batch in enumerate(tqdm(iterator)):
         src = batch.src
         trg = batch.trg
 
