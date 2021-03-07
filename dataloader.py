@@ -37,7 +37,7 @@ class DataLoader:
 
     def load_file(self, max_text_length: int, n_samples: int) -> None:
         """
-        Loads json into memory with respect to the diven amount of samples and maximum text length
+        Loads json into memory with respect to the given amount of samples and maximum text length
 
         Args:
             max_text_length: maximum text length filter
@@ -57,6 +57,8 @@ class DataLoader:
                 if len(example['text'].split(' ')) < max_text_length:
                     if len(self.data) < n_samples:
                         self.data.append(example)
+                    else:
+                        break
 
     @staticmethod
     def clean_text(text: str) -> str:

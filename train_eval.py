@@ -68,7 +68,7 @@ def evaluate(model, iterator, criterion):
     return epoch_loss / len(iterator)
 
 
-def generate_headline(sentence, src_field, trg_field, model, device, max_len=500):
+def generate_headline(sentence, src_field, trg_field, model, device, max_len=100):
 
     tokens = [token.lower() for token in sentence]
 
