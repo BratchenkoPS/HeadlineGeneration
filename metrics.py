@@ -18,7 +18,10 @@ def calculate_avg_rouge_f(test_data, SRC, TRG, model, device):
             src_list.append(src)
 
             prediction = generate_headline(src, SRC, TRG, model, device)
-            prediction = ' '.join(prediction[:-1])
+            if len(prediction) > 1:
+                prediction = ' '.join(prediction[:-1])
+            else:
+                prediction = ' '.join(prediction)
 
             reference = example.trg
             reference = ' '.join(reference)
