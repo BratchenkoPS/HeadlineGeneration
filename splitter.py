@@ -82,6 +82,7 @@ class Splitter:
             batch_size=self.batch_size,
             device=self.device,
             sort=True,
+            sort_within_batch=True,
             sort_key=lambda x: len(x.src))
 
         return train_iterator, test_iterator, train_data, test_data, SRC, TRG

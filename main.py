@@ -92,30 +92,27 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss(ignore_index=trg_pad_idx)
     count_parameters(model)
 
-    N_EPOCHS = 100
+    N_EPOCHS = 90
     CLIP = 0.1
 
-    best_test_loss = float('inf')
+    best_metric = 0
 
     for epoch in range(N_EPOCHS):
         start_time = time.time()
         model.train()
-        train_loss = train(model, train_iterator, optimizer, criterion, CLIP)
+        train_loss = train(model, train_iterator, optimizer, criterion, CLIP, SRC, TRG)
         test_loss = evaluate(model, test_iterator, criterion)
 
-        # metrics_train = calculate_avg_rouge_f(train_data, SRC, TRG, model, device)
-
-        if (epoch + 1) % 10 == 0:
-            metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
-            print(f'\tMetrics_test: {metrics_test}')
+        metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
+        print(f'\tMetrics_test: {metrics_test}')
 
         end_time = time.time()
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
 
-        if test_loss < best_test_loss:
-            best_test_loss = test_loss
+        if metrics_test > best_metric:
+            print('New best score!' )
+            best_metric = metrics_test
             torch.save(model.state_dict(), 'models/best-model.pt')
 
         print(f'Epoch: {epoch + 1:02} | Time: {epoch_mins}m {epoch_secs}s')
-        print(f'\tTrain Loss: {train_loss:.3f} |  Val. Loss: {test_loss:.3f}')
-        # print(f'\tMetrics_train: {metrics_train}')
+        print(f'\tTrain Loss: {train_loss:.3f} |  Test Loss: {test_loss:.3f}')

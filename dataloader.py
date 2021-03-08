@@ -75,6 +75,7 @@ class DataLoader:
         fixed_text = re.sub('<[^>]+>', ' ', text)  # removing everything inside <>
         fixed_text = re.sub('\n', ' ', fixed_text)
         fixed_text = re.sub('&nbsp;', ' ', fixed_text)
+        fixed_text = re.sub('nbsp', ' ', fixed_text)
         fixed_text = re.sub('&mdash;', ' ', fixed_text)
         fixed_text = re.sub('\t', ' ', fixed_text)
         fixed_text = re.sub('\r', ' ', fixed_text)
@@ -82,6 +83,7 @@ class DataLoader:
         fixed_text = re.sub('&gt;', ' ', fixed_text)
         fixed_text = re.sub(r'[^\w\s]', ' ', fixed_text)  # removing the punctuation
         fixed_text = re.sub(' +', ' ', fixed_text)  # fix multiple spaces
+        fixed_text = fixed_text.strip(' ')
         return fixed_text
 
     def get_data(self, max_text_length: int, n_samples: int) -> pd.DataFrame:
@@ -101,6 +103,7 @@ class DataLoader:
         self.data = pd.DataFrame({'text': [sample['text'] for sample in self.data],
                                   'title': [sample['title'] for sample in self.data]})
         self.data.dropna(inplace=True)
+        self.data.drop_duplicates(subset=['title', 'text'], inplace=True)
         self.data.reset_index(inplace=True, drop=True)
 
         self.data['length'] = self.data['text'].apply(lambda x: len(x.split(' ')))

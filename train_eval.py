@@ -3,7 +3,7 @@ import logging
 from tqdm import tqdm
 
 
-def train(model, iterator, optimizer, criterion, clip):
+def train(model, iterator, optimizer, criterion, clip, SRC, TRG):
     model.train()
 
     epoch_loss = 0
@@ -11,8 +11,21 @@ def train(model, iterator, optimizer, criterion, clip):
     for i, batch in enumerate(tqdm(iterator)):
         src = batch.src
         trg = batch.trg
-        print(src, 'src')
-        print(trg, 'trg')
+        # print(src)
+        # print('src')
+        # for example in src:
+        #     text_list = []
+        #     for ind in example:
+        #         text_list.append(SRC.vocab.itos[ind])
+        #     print(text_list)
+        #     break
+        # print('trg')
+        # for example in trg:
+        #     text_list = []
+        #     for ind in example:
+        #         text_list.append(TRG.vocab.itos[ind])
+        #     print(text_list)
+        #     break
 
         optimizer.zero_grad()
 
@@ -42,37 +55,7 @@ def train(model, iterator, optimizer, criterion, clip):
     return epoch_loss / len(iterator)
 
 
-def evaluate(model, iterator, criterion):
-    model.eval()
-    epoch_loss = 0
-
-    with torch.no_grad():
-        for i, batch in enumerate(iterator):
-            src = batch.src
-            trg = batch.trg
-
-            output, _ = model(src, trg[:, :-1])
-
-            # output = [batch size, trg len - 1, output dim]
-            # trg = [batch size, trg len]
-
-            output_dim = output.shape[-1]
-
-            output = output.contiguous().view(-1, output_dim)
-            trg = trg[:, 1:].contiguous().view(-1)
-
-            # output = [batch size * trg len - 1, output dim]
-            # trg = [batch size * trg len - 1]
-
-            loss = criterion(output, trg)
-
-            epoch_loss += loss.item()
-
-    return epoch_loss / len(iterator)
-
-
-def generate_headline(sentence, src_field, trg_field, model, device, max_len=100):
-
+def generate_headline(sentence, src_field, trg_field, model, device, max_len=100):  # TODO make it work with batches
     tokens = [token.lower() for token in sentence]
 
     tokens = [src_field.init_token] + tokens + [src_field.eos_token]
@@ -103,3 +86,32 @@ def generate_headline(sentence, src_field, trg_field, model, device, max_len=100
     trg_tokens = [trg_field.vocab.itos[i] for i in trg_indexes]
 
     return trg_tokens[1:]
+
+
+def evaluate(model, iterator, criterion):
+    model.eval()
+    epoch_loss = 0
+
+    with torch.no_grad():
+        for i, batch in enumerate(iterator):
+            src = batch.src
+            trg = batch.trg
+
+            output, _ = model(src, trg[:, :-1])
+
+            # output = [batch size, trg len - 1, output dim]
+            # trg = [batch size, trg len]
+
+            output_dim = output.shape[-1]
+
+            output = output.contiguous().view(-1, output_dim)
+            trg = trg[:, 1:].contiguous().view(-1)
+
+            # output = [batch size * trg len - 1, output dim]
+            # trg = [batch size * trg len - 1]
+
+            loss = criterion(output, trg)
+
+            epoch_loss += loss.item()
+
+    return epoch_loss / len(iterator)

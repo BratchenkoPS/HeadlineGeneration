@@ -1,6 +1,5 @@
 import torch
 import logging
-import random
 
 from rouge import Rouge
 from train_eval import generate_headline
@@ -19,22 +18,29 @@ def calculate_avg_rouge_f(test_data, SRC, TRG, model, device):
             src_list.append(src)
 
             prediction = generate_headline(src, SRC, TRG, model, device)
-            prediction = ' '.join(prediction)
+            prediction = ' '.join(prediction[:-1])
 
             reference = example.trg
             reference = ' '.join(reference)
+
             pred_list.append(prediction)
             ref_list.append(reference)
 
     rouge = Rouge()
-    scores = rouge.get_scores(pred_list, ref_list, avg=True)
+    scores = rouge.get_scores(pred_list, ref_list)
 
-    n_example = random.randint(0, len(pred_list))
-    logging.info('Prediction title: {}'.format(pred_list[n_example]))
+    metrics = []
+    for example in scores:
+        metric_ex = []
+        for metric in example.values():
+            metric_ex.append(metric['f'])
+        metrics.append(sum(metric_ex) / len(metric_ex))
+
+    n_example = metrics.index(max(metrics))  # cherry picking
+
+    logging.info('Best prediction title: {}'.format(pred_list[n_example]))
     logging.info('Reference title: {}'.format(ref_list[n_example]))
     logging.info('Reference text: {}'.format(src_list[n_example]))
-    f_scores = []
-    for metric in scores.values():
-        f_scores.append(metric['f'])
-    avg_f = sum(f_scores) / len(f_scores)
+
+    avg_f = sum(metrics) / len(metrics)
     return avg_f

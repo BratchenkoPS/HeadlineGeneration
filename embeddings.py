@@ -21,7 +21,6 @@ class Embedder:
         Args:
             config: dict with parameters: url, directory, filename, download flag and TSNE config
         """
-        logging.info('Staring to load Universal Sentence Encoder and build embeddings')
         self.use_url = config['use_url']
         self.use_directory = Path(config['use_directory']).absolute()
         self.use_file_name = config['use_file_name']
@@ -40,8 +39,10 @@ class Embedder:
         """
         if self.download:
             self.download_use()
+            logging.info('Staring to load Universal Sentence Encoder')
         self.use_model = hub.load(str(self.use_directory))
         use_embeddings = []
+        logging.info('Starting to build embeddings from USE')
         for text in tqdm(list_of_text):
             use_embeddings.append(self.use_model([text]).numpy()[0])  # this is just how USE works
         tsne_embeddings = self.tsne.fit_transform(use_embeddings)

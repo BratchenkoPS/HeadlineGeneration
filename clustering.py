@@ -77,7 +77,7 @@ class Clustering:
             closest_index = self.get_closest_index([[x_mean, y_mean]], cluster_vectors)
             closest_replic = self.data.iloc[closest_index]['title']
             center_replics[cluster_num] = closest_replic
-            logging.info('Central replic for cluster number {} is {}'.format(cluster_num, closest_replic))
+            logging.info('Central replic for cluster number {} is: {}'.format(cluster_num, closest_replic))
 
         self.directory.mkdir(parents=True, exist_ok=True)
         total_path_to_save = self.directory.joinpath(self.center_replics_file_name)
