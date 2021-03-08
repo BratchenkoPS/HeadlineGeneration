@@ -110,7 +110,7 @@ if __name__ == '__main__':
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
 
         if metrics_test > best_metric:
-            print('New best score!' )
+            print('New best score!')
             best_metric = metrics_test
             torch.save(model.state_dict(), 'models/best-model.pt')
 
