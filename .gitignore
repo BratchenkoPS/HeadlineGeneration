@@ -1,5 +1,6 @@
 /venv
 .DS_store
 .idea
-data/
-result
+/data
+/result
+/models

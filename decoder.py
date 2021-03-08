@@ -13,7 +13,7 @@ class Decoder(nn.Module):
                  dropout,
                  trg_pad_idx,
                  device,
-                 max_length=500):
+                 max_length=100):
         super().__init__()
 
         self.kernel_size = kernel_size

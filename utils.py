@@ -1,6 +1,3 @@
-import logging
-
-
 def epoch_time(start_time, end_time):
     elapsed_time = end_time - start_time
     elapsed_mins = int(elapsed_time / 60)
@@ -10,5 +7,5 @@ def epoch_time(start_time, end_time):
 
 def count_parameters(model):
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    logging.info(f'The model has {params:,} trainable parameters')
+    print(f'The model has {params:,} trainable parameters')
     return

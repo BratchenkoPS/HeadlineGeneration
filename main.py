@@ -3,6 +3,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import time
+import logging
+import random
+import numpy as np
 
 from dataloader import DataLoader
 from embeddings import Embedder
@@ -19,9 +22,20 @@ if __name__ == '__main__':
     with open('config.yml', 'r') as file:
         config = yaml.load(file)
 
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+
+    SEED = 42
+
+    random.seed(SEED)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    torch.cuda.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+
     loader = DataLoader(config['Dataloader']['url'],
                         config['Dataloader']['path'],
-                        config['Dataloader']['name'])
+                        config['Dataloader']['name'],
+                        config['Dataloader']['download'])
 
     data = loader.get_data(config['Dataloader']['max_txt_length'],
                            config['Dataloader']['samples'])
@@ -78,25 +92,27 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss(ignore_index=trg_pad_idx)
     count_parameters(model)
 
-    N_EPOCHS = 10
+    N_EPOCHS = 90
     CLIP = 0.1
 
-    best_valid_loss = float('inf')
+    best_metric = 0
 
     for epoch in range(N_EPOCHS):
         start_time = time.time()
-
-        train_loss = train(model, train_iterator, optimizer, criterion, CLIP)
+        model.train()
+        train_loss = train(model, train_iterator, optimizer, criterion, CLIP, SRC, TRG)
         test_loss = evaluate(model, test_iterator, criterion)
 
+        metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
+        print(f'\tMetrics_test: {metrics_test}')
+
         end_time = time.time()
-
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
-        metrics_epoch = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)
 
-        if test_loss < best_valid_loss:
-            best_valid_loss = test_loss
-            torch.save(model.state_dict(), 'result/tut5-model.pt')
+        if metrics_test > best_metric:
+            print('New best score!' )
+            best_metric = metrics_test
+            torch.save(model.state_dict(), 'models/best-model.pt')
 
         print(f'Epoch: {epoch + 1:02} | Time: {epoch_mins}m {epoch_secs}s')
-        print(f'\t Val. Loss: {test_loss:.3f} |  Metrics_val: {metrics_epoch}')
+        print(f'\tTrain Loss: {train_loss:.3f} |  Test Loss: {test_loss:.3f}')
