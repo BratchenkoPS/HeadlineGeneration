@@ -55,7 +55,7 @@ def train(model, iterator, optimizer, criterion, clip):
     return epoch_loss / len(iterator)
 
 
-def generate_headline(sentence, src_field, trg_field, model, device, max_len=200):  # TODO make it work with batches
+def generate_headline(sentence, src_field, trg_field, model, device, max_len=100):  # TODO make it work with batches
     tokens = [token.lower() for token in sentence]
 
     tokens = [src_field.init_token] + tokens + [src_field.eos_token]

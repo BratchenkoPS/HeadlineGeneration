@@ -100,7 +100,7 @@ if __name__ == '__main__':
     for epoch in range(N_EPOCHS):
         start_time = time.time()
         model.train()
-        train_loss = train(model, train_iterator, optimizer, criterion, CLIP, SRC, TRG)
+        train_loss = train(model, train_iterator, optimizer, criterion, CLIP)
         test_loss = evaluate(model, test_iterator, criterion)
 
         metrics_test = calculate_avg_rouge_f(test_data, SRC, TRG, model, device)

@@ -12,7 +12,7 @@ class Encoder(nn.Module):
                  kernel_size,
                  dropout,
                  device,
-                 max_length=200):
+                 max_length=100):
         super().__init__()
 
         assert kernel_size % 2 == 1, "Kernel size must be odd!"
