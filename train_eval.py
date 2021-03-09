@@ -3,7 +3,7 @@ import logging
 from tqdm import tqdm
 
 
-def train(model, iterator, optimizer, criterion, clip, SRC, TRG):
+def train(model, iterator, optimizer, criterion, clip):
     model.train()
 
     epoch_loss = 0
@@ -55,7 +55,7 @@ def train(model, iterator, optimizer, criterion, clip, SRC, TRG):
     return epoch_loss / len(iterator)
 
 
-def generate_headline(sentence, src_field, trg_field, model, device, max_len=100):  # TODO make it work with batches
+def generate_headline(sentence, src_field, trg_field, model, device, max_len=200):  # TODO make it work with batches
     tokens = [token.lower() for token in sentence]
 
     tokens = [src_field.init_token] + tokens + [src_field.eos_token]
