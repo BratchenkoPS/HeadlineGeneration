@@ -36,7 +36,7 @@ How we gonna do that? By using unsupervised clustering via Gaussian Mixtures. We
 So the in the result we are getting around 10k replics that supposedly belong to the same domain area and train 
 the model on it. The best result metric (=*mean(Rouge-1-F, Rouge-2-F, Rouge-L-F)*) that i managed to get on such a small dataset is is 0.1617.
 The is also seems to be a little bit of a leak between train and test data, where we have examples with same titles
-but slightly different texts and vice versa. That might also inflate a metric a little bit but that's just the nature of open-domain datasets. Still not bad for such a small amount of data!
+but slightly different texts and vice versa (around 60-ish replics). That might also inflate a metric a little bit but that's just the nature of open-domain datasets. Still not bad for such a small amount of data!
 ## 3) Improvements.
 There are a lot of ways to improve the model that i've just created if we still want to train a model for a
 certain domain area even if not going transformer's way (which would probably be the best way anyway). Here are some of them:
@@ -45,8 +45,12 @@ certain domain area even if not going transformer's way (which would probably be
 ploted so it would be easier to analyse). We should try clusterization on text instead of titles and pick clusters
 manually analyzing the result data. We can also use keyword search to pick domain area like "sport", "politics", etc.
 2) Use more data. This seems to be the biggest issue, because the model seems to be overfitting pretty fast. 
-If we will use more data we could also leave the punctuation, use longer sequences and stack a bit more layers.
+If we will use more data we could also leave the punctuation, use longer sequences and stack a bit more layers. 
 Should also probably increase the kernel size for that one to find patterns in longer sequences.
+After i've realised that the experiment failed i've tried to train model with 2x the conv layers, 2x hidden dim and 2x embeddings size on 150 token length data (440k examples)
+and it worked pretty well - the correlation between train and test loss was ways stronger which tells you that
+the generalisation ability of the networks improved a lot. Sadly after 6 epoch (~hour per epoch) collab session ended 
+and i didn't manage to get metrics as high as i wanted.
 3) Use pretrained fasttext/word2vec embeddings vocab as a baseline for embedding layers.
 4) All of TODO's from scripts and more docstring/typization hints
 ## 4) How to run
